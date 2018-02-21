@@ -1,0 +1,22 @@
+Metadata-Version: 1.1
+Name: ktpl
+Version: 0.0.1
+Summary: Render jinja2 templates from input-files, or from environment variables
+Home-page: https://github.com/whereismyjetpack/yajinja
+Author: Dann Bohn
+Author-email: dannbohn@gmail.com
+License: ISC
+Description: 
+        
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Intended Audience :: System Administrators
+Classifier: Intended Audience :: Developers
+Classifier: Natural Language :: English
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: Topic :: Utilities
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: Implementation :: CPython

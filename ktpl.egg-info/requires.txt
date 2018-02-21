@@ -1,0 +1,5 @@
+setuptools
+pyyaml
+python-slugify
+docopt
+jinja2

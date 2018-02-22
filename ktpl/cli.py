@@ -4,6 +4,7 @@ Usage:
 
 Options:
   --delete -d                  Delete, instead of apply templated manifests
+  --template -t                Template manifests, and print to screen 
 """
 from __future__ import absolute_import
 from .__version__ import __version__
@@ -27,55 +28,57 @@ def main(arguments):
         kube_method = 'apply'
 
     if arguments['<folder>']:
-        # todo test for folders here
         folders = arguments['<folder>']
     else:
         folders = [f for f in sorted(os.listdir(os.getcwd())) if os.path.isdir(f)]
-        folders.append(os.getcwd())
+        # folders.append(os.getcwd())
 
     extensions = ('.yaml', 'yml')
-
-    def merge_dict(x, y):
-        z = x.copy()
-        z.update(y)
-        return z    
 
     values_files = find_values_files('.', extensions, "values")
     secret_values = find_values_files('.', 'secret', "values")
     [ variables.update(process_variables(file)) for file in values_files ]
     [ variables.update(process_variables(file)) for file in secret_values ]
-
-    # TODO add global secret file
     
     def add_secret_files(filename):
         if os.path.isfile(filename + ".secret"):
             variables.update(process_variables(filename + ".secret"))
+            return True
+        else:
+            return False
 
     for folder in folders:
         deployment_values = find_values_files('.', extensions, folder)
         secret_values = find_values_files('.', 'secret', folder)
         template_files = [os.path.join(dp, f) for dp, dn, fn in os.walk(os.path.expanduser(folder), followlinks=True) for f in fn if f.endswith('.tpl') ]
-        if secret_values and not deployment_values:
-            for filename in secret_values:
-                variables.update(process_variables(filename))
-                output = [ proceess_template(os.path.basename(os.path.abspath(file_path)), os.path.dirname(os.path.abspath(file_path)), variables) for file_path in template_files ] 
-                output = '\n'.join(output)
-                if output:
-                    run_kube_command(output, kube_method)
+
+        if not template_files:
+            continue
+
         if deployment_values:
             for filename in deployment_values:
-                add_secret_files(filename)
+                if add_secret_files(filename):
+                    secret_values.remove(filename + ".secret")
                 variables.update(process_variables(filename))
-                output = [ proceess_template(os.path.basename(os.path.abspath(file_path)), os.path.dirname(os.path.abspath(file_path)), variables) for file_path in template_files ] 
-                output = '\n'.join(output)
-                if output:
-                    run_kube_command(output, kube_method)
+                process_output(variables, template_files, arguments, kube_method, folder, filename=filename)
+        if secret_values:
+            for filename in secret_values:
+                variables.update(process_variables(filename))
+                process_output(variables, template_files, arguments, kube_method, folder, filename=filename)
         else:
-            output = [ proceess_template(os.path.basename(os.path.abspath(file_path)), os.path.dirname(os.path.abspath(file_path)), variables) for file_path in template_files ] 
-            output = '\n'.join(output)
-            if output:
-                run_kube_command(output, kube_method)
+            process_output(variables, template_files, arguments, kube_method, folder)
 
+def process_output(variables, template_files, arguments, kube_method, folder, filename=None):
+    output = [ proceess_template(os.path.basename(os.path.abspath(file_path)), os.path.dirname(os.path.abspath(file_path)), variables) for file_path in template_files ] 
+    output = '\n'.join(output)
+    if arguments['--template']:
+        print(output)
+    else:
+        if filename:
+            print('\nSending Manifests from %s for %s to kubectl...') % (folder, filename)
+        else:
+            print('\nSending Manifests from %s to kubectl...') % (folder)
+        run_kube_command(output, kube_method)
 
 def find_values_files(folder, extensions, pattern):
     pattern = re.compile(pattern)
@@ -97,10 +100,7 @@ def process_variables(input_file):
         # TODO fix this 
         return {}
 
-
 def proceess_template(template_file, searchpath, variables):
-    print('processing %s') % template_file
-    print('processing %s') % searchpath
     loader = FileSystemLoader(searchpath=searchpath)
     env = Environment(loader=loader, undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True)
     env.filters['b64dec'] = b64dec

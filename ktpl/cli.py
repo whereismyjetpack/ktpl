@@ -4,7 +4,8 @@ Usage:
 
 Options:
   --delete -d                  Delete, instead of apply templated manifests
-  --template -t                Template manifests, and print to screen 
+  --template -t                Template manifests, and print to screen
+  --environment -e             Consider environment when processing variables
 """
 from __future__ import absolute_import
 from docopt import docopt
@@ -27,6 +28,9 @@ def main(arguments):
     else:
         kube_method = 'apply'
 
+    if arguments['--environment']:
+        variables.update(dict(os.environ.items()))
+
     if arguments['<folder>']:
         folders = arguments['<folder>']
     else:
@@ -39,7 +43,7 @@ def main(arguments):
     secret_values = find_values_files('.', 'secret', "values")
     [ variables.update(process_variables(filename)) for filename in values_files ]
     [ variables.update(process_variables(filename)) for filename in secret_values ]
-    
+
     def add_secret_files(filename):
         """
         Adds variables from a *.secret file. Returns True if found,

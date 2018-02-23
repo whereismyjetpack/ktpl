@@ -1,12 +1,16 @@
 """
 Usage:
   ktpl [options] [<folder>...]
+  ktpl [options] [--input-file=<file>]...
 
 Options:
   --delete -d                  Delete, instead of apply templated manifests
   --template -t                Template manifests, and print to screen
   --environment -e             Consider environment when processing variables
+  --input-file=<file> -i       Path to input files(s) to process instead of the defaults
 """
+#TODO maybe default input files? 
+#TODO add extenions options
 from __future__ import absolute_import
 from docopt import docopt
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
@@ -22,6 +26,8 @@ def main(arguments):
     main
     """
     variables = {}
+    extensions = ('.yaml', 'yml')
+
     if arguments['--delete']:
         kube_method = 'delete'
     else:
@@ -29,19 +35,21 @@ def main(arguments):
 
     if arguments['--environment']:
         variables.update(dict(os.environ.items()))
+    
+    if arguments['--input-file']:
+        [ variables.update(process_variables(filename)) for filename in arguments['--input-file'] ]
+    else:
+        values_files = find_values_files('.', extensions, "values")
+        secret_values = find_values_files('.', 'secret', "values")
+        [ variables.update(process_variables(filename)) for filename in values_files ]
+        [ variables.update(process_variables(filename)) for filename in secret_values ]
+
 
     if arguments['<folder>']:
         folders = arguments['<folder>']
     else:
         folders = [f for f in sorted(os.listdir(os.getcwd())) if os.path.isdir(f)]
-        # folders.append(os.getcwd())
 
-    extensions = ('.yaml', 'yml')
-
-    values_files = find_values_files('.', extensions, "values")
-    secret_values = find_values_files('.', 'secret', "values")
-    [ variables.update(process_variables(filename)) for filename in values_files ]
-    [ variables.update(process_variables(filename)) for filename in secret_values ]
 
     def add_secret_files(filename):
         """
@@ -84,10 +92,6 @@ def process_output(variables, template_files, arguments, kube_method, folder, fi
     if arguments['--template']:
         print(output)
     else:
-        if filename:
-            print('\033[91m\nSending Manifests from %s for %s to kubectl...\033[00m') % (folder, filename)
-        else:
-            print('\033[91m\nSending Manifests from %s to kubectl...\033[00m') % (folder)
         run_kube_command(output, kube_method)
 
 def find_values_files(folder, extensions, pattern):

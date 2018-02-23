@@ -9,8 +9,6 @@ Options:
   --environment -e             Consider environment when processing variables
   --input-file=<file> -i       Path to input files(s) to process instead of the defaults
 """
-#TODO maybe default input files? 
-#TODO add extenions options
 from __future__ import absolute_import
 from docopt import docopt
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
@@ -35,7 +33,6 @@ def main(arguments):
 
     if arguments['--environment']:
         variables.update(dict(os.environ.items()))
-    
     if arguments['--input-file']:
         for filename in arguments['--input-file']:
             variables.update(process_variables(filename))
@@ -45,7 +42,6 @@ def main(arguments):
         all_values = values_files + secret_values
         for filename in all_values:
             variables.update(process_variables(filename))
-
 
     if arguments['<folder>']:
         folders = arguments['<folder>']
@@ -66,12 +62,13 @@ def main(arguments):
             return False
 
     for folder in folders:
+        #TODO do we default deployment vars if we specify at the command line?
         deployment_vars = find_values_files(folder, extensions, "values")
         for filename in deployment_vars:
             variables.update(process_variables(filename))
         deployment_values = find_values_files('.', extensions, folder)
         secret_values = find_values_files('.', 'secret', folder)
-        template_files = [os.path.join(dp, f) for dp, dn, fn in os.walk(os.path.expanduser(folder), followlinks=True) for f in fn if f.endswith('.tpl') ]
+        template_files = [ os.path.join(dp, f) for dp, dn, fn in os.walk(os.path.expanduser(folder), followlinks=True) for f in fn if f.endswith('.tpl') ]
 
         if not template_files:
             continue
@@ -81,17 +78,16 @@ def main(arguments):
                 if add_secret_files(filename):
                     secret_values.remove(filename + ".secret")
                 variables.update(process_variables(filename))
-                process_output(variables, template_files, arguments, kube_method, folder, filename=filename)
+                process_output(variables, template_files, arguments, kube_method, folder, filename)
         if secret_values:
             for filename in secret_values:
                 variables.update(process_variables(filename))
-                process_output(variables, template_files, arguments, kube_method, folder, filename=filename)
+                process_output(variables, template_files, arguments, kube_method, folder, filename)
         else:
             process_output(variables, template_files, arguments, kube_method, folder)
 
-def process_output(variables, template_files, arguments, kube_method, folder, filename=None):
+def process_output(variables, template_files, arguments, kube_method, folder, filename):
     output = ""
-    # TODO do we want to run kube command per file, or all at once?
     for file_path in template_files:
         output = output + "\n" + process_template(os.path.basename(os.path.abspath(file_path)), os.path.dirname(os.path.abspath(file_path)), variables)
 
@@ -102,7 +98,7 @@ def process_output(variables, template_files, arguments, kube_method, folder, fi
 
 def find_values_files(folder, extensions, pattern):
     pattern = re.compile(pattern)
-    return [os.path.join(folder, file) for file in os.listdir(folder) if file.endswith(extensions) and pattern.match(file)]
+    return [ os.path.join(folder, filename) for filename in os.listdir(folder) if file.endswith(extensions) and pattern.match(filename) ]
 
 
 def process_variables(input_file):
@@ -112,12 +108,11 @@ def process_variables(input_file):
 
     with open(input_file, 'r') as f:
         current_file = f.read()
-    
+
     yaml_load = yaml.safe_load(current_file)
     if isinstance(yaml_load, dict):
         return yaml_load
     else:
-        # TODO fix this 
         return {}
 
 def process_template(template_file, searchpath, variables):
@@ -129,7 +124,6 @@ def process_template(template_file, searchpath, variables):
     template = env.get_template(template_file)
 
     return template.render(variables)
-    
 
 def cli():
     arguments = docopt(__doc__, version=__version__)

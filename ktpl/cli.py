@@ -78,11 +78,11 @@ def main(arguments):
                 if add_secret_files(filename):
                     secret_values.remove(filename + ".secret")
                 variables.update(process_variables(filename))
-                process_output(variables, template_files, arguments, kube_method, folder, filename)
+                process_output(variables, template_files, arguments, kube_method, folder)
         if secret_values:
             for filename in secret_values:
                 variables.update(process_variables(filename))
-                process_output(variables, template_files, arguments, kube_method, folder, filename)
+                process_output(variables, template_files, arguments, kube_method, folder)
         else:
             process_output(variables, template_files, arguments, kube_method, folder)
 
@@ -98,7 +98,7 @@ def process_output(variables, template_files, arguments, kube_method, folder, fi
 
 def find_values_files(folder, extensions, pattern):
     pattern = re.compile(pattern)
-    return [ os.path.join(folder, filename) for filename in os.listdir(folder) if file.endswith(extensions) and pattern.match(filename) ]
+    return [ os.path.join(folder, filename) for filename in os.listdir(folder) if filename.endswith(extensions) and pattern.match(filename) ]
 
 
 def process_variables(input_file):

@@ -8,8 +8,8 @@ Options:
   --delete -d                  Delete, instead of apply templated manifests
   --template -t                Template manifests, and print to screen
   --environment -e             Consider environment when processing variables
-  --input-file=<file> -i       Path to input files(s) to process instead of the defaults
-  --template-file=<file> -t           path to template file
+  --input-file=<file> -i       Path to input file(s) to process instead of the defaults
+  --template-file=<file> -t    Path to template file(s) to process instead of the defaults
 """
 from __future__ import absolute_import
 from docopt import docopt
@@ -27,6 +27,7 @@ def main(arguments):
     """
     variables = {}
     extensions = ('.yaml', 'yml')
+    folders = []
 
     if arguments['--delete']:
         kube_method = 'delete'
@@ -47,6 +48,8 @@ def main(arguments):
 
     if arguments['<folder>']:
         folders = arguments['<folder>']
+    elif arguments['--template-file']:
+        process_output(variables, arguments['--template-file'], arguments, kube_method)
     else:
         folders = [f for f in sorted(os.listdir(os.getcwd())) if os.path.isdir(f)]
 
@@ -79,13 +82,13 @@ def main(arguments):
                 if add_secret_files(filename):
                     secret_values.remove(filename + ".secret")
                 variables = merge_variables(variables, process_variables(filename))
-                process_output(variables, template_files, arguments, kube_method, folder)
+                process_output(variables, template_files, arguments, kube_method)
         if secret_values:
             for filename in secret_values:
                 variables = merge_variables(variables, process_variables(filename))
-                process_output(variables, template_files, arguments, kube_method, folder)
+                process_output(variables, template_files, arguments, kube_method)
         else:
-            process_output(variables, template_files, arguments, kube_method, folder)
+            process_output(variables, template_files, arguments, kube_method)
 
 
 def merge_variables(x, y):
@@ -93,7 +96,7 @@ def merge_variables(x, y):
     z.update(y)
     return z
 
-def process_output(variables, template_files, arguments, kube_method, folder):
+def process_output(variables, template_files, arguments, kube_method):
     output = ""
     for file_path in template_files:
         output = output + "\n" + process_template(os.path.basename(os.path.abspath(file_path)), os.path.dirname(os.path.abspath(file_path)), variables)

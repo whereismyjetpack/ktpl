@@ -2,12 +2,14 @@
 Usage:
   ktpl [options] [<folder>...]
   ktpl [options] [--input-file=<file>]...
+  ktpl [options] [--template-file=<file>]...
 
 Options:
   --delete -d                  Delete, instead of apply templated manifests
   --template -t                Template manifests, and print to screen
   --environment -e             Consider environment when processing variables
   --input-file=<file> -i       Path to input files(s) to process instead of the defaults
+  --template-file=<file> -t           path to template file
 """
 from __future__ import absolute_import
 from docopt import docopt
@@ -32,16 +34,19 @@ def main(arguments):
         kube_method = 'apply'
 
     if arguments['--environment']:
-        variables.update(dict(os.environ.items()))
+        variables = merge_variables(variables, dict(os.environ.items()))
+        # variables.update(dict(os.environ.items()))
     if arguments['--input-file']:
         for filename in arguments['--input-file']:
-            variables.update(process_variables(filename))
+            variables = merge_variables(variables, process_variables(filename))
+            # variables.update(process_variables(filename))
     else:
         values_files = find_values_files('.', extensions, "values")
         secret_values = find_values_files('.', 'secret', "values")
         all_values = values_files + secret_values
         for filename in all_values:
-            variables.update(process_variables(filename))
+            variables = merge_variables(variables, process_variables(filename))
+            # variables.update(process_variables(filename))
 
     if arguments['<folder>']:
         folders = arguments['<folder>']
@@ -56,16 +61,16 @@ def main(arguments):
         """
 
         if os.path.isfile(filename + ".secret"):
-            variables.update(process_variables(filename + ".secret"))
+            variables = merge_variables(variables, process_variables(filename + ".secret"))
+            # variables.update(process_variables(filename + ".secret"))
             return True
         else:
             return False
 
     for folder in folders:
-        #TODO do we default deployment vars if we specify at the command line?
         deployment_vars = find_values_files(folder, extensions, "values")
         for filename in deployment_vars:
-            variables.update(process_variables(filename))
+            variables = merge_variables(process_variables(filename), variables)
         deployment_values = find_values_files('.', extensions, folder)
         secret_values = find_values_files('.', 'secret', folder)
         template_files = [ os.path.join(dp, f) for dp, dn, fn in os.walk(os.path.expanduser(folder), followlinks=True) for f in fn if f.endswith('.tpl') ]
@@ -77,16 +82,24 @@ def main(arguments):
             for filename in deployment_values:
                 if add_secret_files(filename):
                     secret_values.remove(filename + ".secret")
-                variables.update(process_variables(filename))
+                # variables.update(process_variables(filename))
+                variables = merge_variables(variables, process_variables(filename))
                 process_output(variables, template_files, arguments, kube_method, folder)
         if secret_values:
             for filename in secret_values:
-                variables.update(process_variables(filename))
+                variables = merge_variables(variables, process_variables(filename))
+                # variables.update(process_variables(filename))
                 process_output(variables, template_files, arguments, kube_method, folder)
         else:
             process_output(variables, template_files, arguments, kube_method, folder)
 
-def process_output(variables, template_files, arguments, kube_method, folder, filename):
+
+def merge_variables(x, y):
+    z = x.copy()
+    z.update(y)
+    return z
+
+def process_output(variables, template_files, arguments, kube_method, folder):
     output = ""
     for file_path in template_files:
         output = output + "\n" + process_template(os.path.basename(os.path.abspath(file_path)), os.path.dirname(os.path.abspath(file_path)), variables)

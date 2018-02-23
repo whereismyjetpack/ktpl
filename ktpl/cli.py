@@ -5,11 +5,11 @@ Usage:
   ktpl [options] [--template-file=<file>]...
 
 Options:
-  --delete -d                  Delete, instead of apply templated manifests
-  --template -t                Template manifests, and print to screen
-  --environment -e             Consider environment when processing variables
-  --input-file=<file> -i       Path to input file(s) to process instead of the defaults
-  --template-file=<file> -t    Path to template file(s) to process instead of the defaults
+  --delete -d                      Delete, instead of apply templated manifests
+  --template -t                    Template manifests, and print to screen
+  --environment -e                 Consider environment when processing variables
+  --input-file=<file> -i           Path to input file(s) to process instead of the defaults
+  --template-file=<file> -t        Path to template file(s) to process instead of the defaults
 """
 from __future__ import absolute_import
 from docopt import docopt
@@ -21,38 +21,14 @@ from .__version__ import __version__
 from .kube import run_kube_command
 from .filters import b64dec, b64enc, slugify_string
 
+
 def main(arguments):
-    """
-    main
-    """
+    
     variables = {}
-    extensions = ('.yaml', 'yml')
+    extensions = ('.yaml', '.yml')
+    template_extensions = ('.tpl')
+    secret_extensions = ('.secret')
     folders = []
-
-    if arguments['--delete']:
-        kube_method = 'delete'
-    else:
-        kube_method = 'apply'
-
-    if arguments['--environment']:
-        variables = merge_variables(variables, dict(os.environ.items()))
-    if arguments['--input-file']:
-        for filename in arguments['--input-file']:
-            variables = merge_variables(variables, process_variables(filename))
-    else:
-        values_files = find_values_files('.', extensions, "values")
-        secret_values = find_values_files('.', 'secret', "values")
-        all_values = values_files + secret_values
-        for filename in all_values:
-            variables = merge_variables(variables, process_variables(filename))
-
-    if arguments['<folder>']:
-        folders = arguments['<folder>']
-    elif arguments['--template-file']:
-        process_output(variables, arguments['--template-file'], arguments, kube_method)
-    else:
-        folders = [f for f in sorted(os.listdir(os.getcwd())) if os.path.isdir(f)]
-
 
     def add_secret_files(filename):
         """
@@ -66,13 +42,39 @@ def main(arguments):
         else:
             return False
 
+    if arguments['--delete']:
+        kube_method = 'delete'
+    else:
+        kube_method = 'apply'
+
+    if arguments['--environment']:
+        variables = merge_variables(variables, dict(os.environ.items()))
+
+    if arguments['--input-file']:
+        for filename in arguments['--input-file']:
+            variables = merge_variables(variables, process_variables(filename))
+    else:
+        values_files = find_values_files('.', extensions, "values")
+        secret_values = find_values_files('.', secret_extensions, "values")
+        all_values = values_files + secret_values
+        for filename in all_values:
+            variables = merge_variables(variables, process_variables(filename))
+
+    if arguments['<folder>']:
+        folders = arguments['<folder>']
+    elif arguments['--template-file']:
+        process_output(variables, arguments['--template-file'], arguments, kube_method)
+    else:
+        folders = [f for f in sorted(os.listdir(os.getcwd())) if os.path.isdir(f)]
+
+
     for folder in folders:
         deployment_vars = find_values_files(folder, extensions, "values")
         for filename in deployment_vars:
             variables = merge_variables(process_variables(filename), variables)
         deployment_values = find_values_files('.', extensions, folder)
         secret_values = find_values_files('.', 'secret', folder)
-        template_files = [ os.path.join(dp, f) for dp, dn, fn in os.walk(os.path.expanduser(folder), followlinks=True) for f in fn if f.endswith('.tpl') ]
+        template_files = [ os.path.join(dp, f) for dp, dn, fn in os.walk(os.path.expanduser(folder), followlinks=True) for f in fn if f.endswith(template_extensions) ]
 
         if not template_files:
             continue

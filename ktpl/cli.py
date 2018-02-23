@@ -8,7 +8,7 @@ Options:
 """
 from __future__ import absolute_import
 from docopt import docopt
-from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import yaml
 import re
 import os
@@ -37,10 +37,15 @@ def main(arguments):
 
     values_files = find_values_files('.', extensions, "values")
     secret_values = find_values_files('.', 'secret', "values")
-    [ variables.update(process_variables(file)) for file in values_files ]
-    [ variables.update(process_variables(file)) for file in secret_values ]
+    [ variables.update(process_variables(filename)) for filename in values_files ]
+    [ variables.update(process_variables(filename)) for filename in secret_values ]
     
     def add_secret_files(filename):
+        """
+        Adds variables from a *.secret file. Returns True if found,
+        False if not found
+        """
+
         if os.path.isfile(filename + ".secret"):
             variables.update(process_variables(filename + ".secret"))
             return True

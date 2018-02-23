@@ -17,7 +17,6 @@ from .__version__ import __version__
 from .kube import run_kube_command
 from .filters import b64dec, b64enc, slugify_string
 
-
 def main(arguments):
     """
     main
@@ -57,6 +56,8 @@ def main(arguments):
             return False
 
     for folder in folders:
+        deployment_vars = find_values_files(folder, extensions, "values")
+        [ variables.update(process_variables(filename)) for filename in deployment_vars]
         deployment_values = find_values_files('.', extensions, folder)
         secret_values = find_values_files('.', 'secret', folder)
         template_files = [os.path.join(dp, f) for dp, dn, fn in os.walk(os.path.expanduser(folder), followlinks=True) for f in fn if f.endswith('.tpl') ]
@@ -84,9 +85,9 @@ def process_output(variables, template_files, arguments, kube_method, folder, fi
         print(output)
     else:
         if filename:
-            print('\nSending Manifests from %s for %s to kubectl...') % (folder, filename)
+            print('\033[91m\nSending Manifests from %s for %s to kubectl...\033[00m') % (folder, filename)
         else:
-            print('\nSending Manifests from %s to kubectl...') % (folder)
+            print('\033[91m\nSending Manifests from %s to kubectl...\033[00m') % (folder)
         run_kube_command(output, kube_method)
 
 def find_values_files(folder, extensions, pattern):
@@ -111,7 +112,7 @@ def process_variables(input_file):
 
 def proceess_template(template_file, searchpath, variables):
     loader = FileSystemLoader(searchpath=searchpath)
-    env = Environment(loader=loader, undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True)
+    env = Environment(loader=loader, undefined=StrictUndefined, trim_blocks=False, lstrip_blocks=False)
     env.filters['b64dec'] = b64dec
     env.filters['b64enc'] = b64enc
     env.filters['slugify_string'] = slugify_string

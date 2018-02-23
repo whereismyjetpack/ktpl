@@ -37,12 +37,14 @@ def main(arguments):
         variables.update(dict(os.environ.items()))
     
     if arguments['--input-file']:
-        [ variables.update(process_variables(filename)) for filename in arguments['--input-file'] ]
+        for filename in arguments['--input-file']:
+            variables.update(process_variables(filename))
     else:
         values_files = find_values_files('.', extensions, "values")
         secret_values = find_values_files('.', 'secret', "values")
-        [ variables.update(process_variables(filename)) for filename in values_files ]
-        [ variables.update(process_variables(filename)) for filename in secret_values ]
+        all_values = values_files + secret_values
+        for filename in all_values:
+            variables.update(process_variables(filename))
 
 
     if arguments['<folder>']:
@@ -65,7 +67,8 @@ def main(arguments):
 
     for folder in folders:
         deployment_vars = find_values_files(folder, extensions, "values")
-        [ variables.update(process_variables(filename)) for filename in deployment_vars]
+        for filename in deployment_vars:
+            variables.update(process_variables(filename))
         deployment_values = find_values_files('.', extensions, folder)
         secret_values = find_values_files('.', 'secret', folder)
         template_files = [os.path.join(dp, f) for dp, dn, fn in os.walk(os.path.expanduser(folder), followlinks=True) for f in fn if f.endswith('.tpl') ]
@@ -87,8 +90,11 @@ def main(arguments):
             process_output(variables, template_files, arguments, kube_method, folder)
 
 def process_output(variables, template_files, arguments, kube_method, folder, filename=None):
-    output = [ proceess_template(os.path.basename(os.path.abspath(file_path)), os.path.dirname(os.path.abspath(file_path)), variables) for file_path in template_files ] 
-    output = '\n'.join(output)
+    output = ""
+    # TODO do we want to run kube command per file, or all at once?
+    for file_path in template_files:
+        output = output + "\n" + process_template(os.path.basename(os.path.abspath(file_path)), os.path.dirname(os.path.abspath(file_path)), variables)
+
     if arguments['--template']:
         print(output)
     else:
@@ -114,7 +120,7 @@ def process_variables(input_file):
         # TODO fix this 
         return {}
 
-def proceess_template(template_file, searchpath, variables):
+def process_template(template_file, searchpath, variables):
     loader = FileSystemLoader(searchpath=searchpath)
     env = Environment(loader=loader, undefined=StrictUndefined, trim_blocks=False, lstrip_blocks=False)
     env.filters['b64dec'] = b64dec

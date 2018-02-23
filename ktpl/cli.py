@@ -35,18 +35,15 @@ def main(arguments):
 
     if arguments['--environment']:
         variables = merge_variables(variables, dict(os.environ.items()))
-        # variables.update(dict(os.environ.items()))
     if arguments['--input-file']:
         for filename in arguments['--input-file']:
             variables = merge_variables(variables, process_variables(filename))
-            # variables.update(process_variables(filename))
     else:
         values_files = find_values_files('.', extensions, "values")
         secret_values = find_values_files('.', 'secret', "values")
         all_values = values_files + secret_values
         for filename in all_values:
             variables = merge_variables(variables, process_variables(filename))
-            # variables.update(process_variables(filename))
 
     if arguments['<folder>']:
         folders = arguments['<folder>']
@@ -62,7 +59,6 @@ def main(arguments):
 
         if os.path.isfile(filename + ".secret"):
             variables = merge_variables(variables, process_variables(filename + ".secret"))
-            # variables.update(process_variables(filename + ".secret"))
             return True
         else:
             return False
@@ -82,13 +78,11 @@ def main(arguments):
             for filename in deployment_values:
                 if add_secret_files(filename):
                     secret_values.remove(filename + ".secret")
-                # variables.update(process_variables(filename))
                 variables = merge_variables(variables, process_variables(filename))
                 process_output(variables, template_files, arguments, kube_method, folder)
         if secret_values:
             for filename in secret_values:
                 variables = merge_variables(variables, process_variables(filename))
-                # variables.update(process_variables(filename))
                 process_output(variables, template_files, arguments, kube_method, folder)
         else:
             process_output(variables, template_files, arguments, kube_method, folder)

@@ -7,14 +7,14 @@ Options:
   --template -t                Template manifests, and print to screen 
 """
 from __future__ import absolute_import
-from .__version__ import __version__
-from .kube import run_kube_command
 from docopt import docopt
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined
-from .filters import b64dec, b64enc, slugify_string
 import yaml
 import re
 import os
+from .__version__ import __version__
+from .kube import run_kube_command
+from .filters import b64dec, b64enc, slugify_string
 
 
 def main(arguments):

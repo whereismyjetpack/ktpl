@@ -25,3 +25,18 @@ Options:
 ```
 
 
+Directory Structure:
+```.
+├── folder-1
+│   ├── template.yml.tpl
+│   └── values.yml
+├── folder-2
+│   ├── template.yml.tpl
+│   └── values.yml
+├── values.yml
+├── folder-2.yml
+├── folder-1.yml
+└── values.yml.secret```
+
+
+

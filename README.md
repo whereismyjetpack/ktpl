@@ -42,8 +42,11 @@ Directory Structure:
 ```
 
 Variable precidence:
+
 {{folder_name}}.yml
+
 values.yml
+
 {{folder_name}}/values.yml
 
 Examples:

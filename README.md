@@ -43,13 +43,14 @@ Directory Structure:
 
 Variable precidence:
 
-{{folder_name}}.yml
+- {{folder_name}}.yml
 
-values.yml
+- values.yml
 
-{{folder_name}}/values.yml
+- {{folder_name}}/values.yml
 
 Examples:
+
 `ktpl`  # will template all resources from `folder-1` and `folder-2`. `folder-2` will be applied twice, the templated resources will be passed to `kubectl apply`
 
 `ktpl folder-1` # will template only resources from `folder-1`, and the templated resources will be passed to `kubectl apply`

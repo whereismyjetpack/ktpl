@@ -1,5 +1,7 @@
 .venv
 build/*
 dist/*
+ktpl.egg-info/
 __pycache__
+.pytest_cache
 *.pyc

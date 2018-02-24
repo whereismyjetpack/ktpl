@@ -3,7 +3,7 @@
 Command line utility to template out Kubernetes Resource Definitions from jinja2 templates, and apply or delete them
 
 ## Getting Started
-`pip install github.com/whereismyjetpack/ktpl.git`
+`pip install git+https://github.com/whereismyjetpack/ktpl.git@master`
 
 ### Prerequisites
 

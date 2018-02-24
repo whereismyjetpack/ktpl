@@ -26,17 +26,31 @@ Options:
 
 
 Directory Structure:
+
 ```.
 ├── folder-1
 │   ├── template.yml.tpl
-│   └── values.yml
+│   └── values.yml <- "defaulty" variables for resources in this folder
 ├── folder-2
 │   ├── template.yml.tpl
-│   └── values.yml
-├── values.yml
-├── folder-2.yml
-├── folder-1.yml
-└── values.yml.secret```
+│   └── values.yml <- "defaulty" variables for resources in this folder
+├── values.yml <--- global variables used in all resources
+├── folder-2.yml <--- values that get added only for resources in folder-2
+├── folder-2-customer-b.yml <--- a second set of values, that will get appied to resources in folder-2
+├── folder-1.yml <---values that get added only for resources in folder-1
+└── values.yml.secret <--- global variables, that will be merged with values.yml. good for using `git-crypt` to encrypt only secret portions of your variables
+```
+
+Variable precidence:
+{{folder_name}}.yml
+values.yml
+{{folder_name}}/values.yml
+
+Examples:
+`ktpl`  # will template all resources from `folder-1` and `folder-2`. `folder-2` will be applied twice, the templated resources will be passed to `kubectl apply`
+`ktpl folder-1` # will template only resources from `folder-1`, and the templated resources will be passed to `kubectl apply`
+`ktpl --template` # will do as example 1, but instead of passing to `kubectl apply` the results will be printed to screen
+
 
 
 

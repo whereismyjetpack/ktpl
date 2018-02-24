@@ -27,20 +27,19 @@ def main(arguments):
     variables = {}
     extensions = ('.yaml', '.yml')
     template_extensions = ('.tpl')
-    secret_extensions = ('.secret')
+    secret_extension = '.secret'
     folders = []
 
-    def add_secret_files(filename):
+    def has_secret_file(filename):
         """
-        Adds variables from a *.secret file. Returns True if found,
+        Checks for a secret deployment file, returns True if found
         False if not found
         """
-
-        if os.path.isfile(filename + ".secret"):
-            variables = merge_variables(variables, process_variables(filename + ".secret"))
+        secret_file = filename + secret_extension
+        if os.path.isfile(secret_file):
             return True
-        else:
-            return False
+
+        return False
 
     if arguments['--delete']:
         kube_method = 'delete'
@@ -55,7 +54,7 @@ def main(arguments):
             variables = merge_variables(variables, process_variables(filename))
     else:
         values_files = find_values_files('.', extensions, "values")
-        secret_values = find_values_files('.', secret_extensions, "values")
+        secret_values = find_values_files('.', secret_extension, "values")
         all_values = values_files + secret_values
         for filename in all_values:
             variables = merge_variables(variables, process_variables(filename))
@@ -73,7 +72,7 @@ def main(arguments):
         for filename in deployment_vars:
             variables = merge_variables(process_variables(filename), variables)
         deployment_values = find_values_files('.', extensions, folder)
-        secret_values = find_values_files('.', 'secret', folder)
+        secret_values = find_values_files('.', secret_extension, folder)
         template_files = [ os.path.join(dp, f) for dp, dn, fn in os.walk(os.path.expanduser(folder), followlinks=True) for f in fn if f.endswith(template_extensions) ]
 
         if not template_files:
@@ -81,8 +80,9 @@ def main(arguments):
 
         if deployment_values:
             for filename in deployment_values:
-                if add_secret_files(filename):
-                    secret_values.remove(filename + ".secret")
+                if has_secret_file(filename):
+                    variables = merge_variables(variables, process_variables(filename + secret_extension))
+                    secret_values.remove(filename + secret_extension)
                 variables = merge_variables(variables, process_variables(filename))
                 process_output(variables, template_files, arguments, kube_method)
         if secret_values:

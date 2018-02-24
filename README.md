@@ -25,7 +25,7 @@ Options:
 ```
 
 
-Directory Structure:
+### Directory Structure:
 
 ```.
 ├── folder-1
@@ -41,21 +41,20 @@ Directory Structure:
 └── values.yml.secret <--- global variables, that will be merged with values.yml. good for using `git-crypt` to encrypt only secret portions of your variables
 ```
 
-Variable precidence:
+### Variable precidence:
+{{folder_name}}.yml
+values.yml
+{{folder_name}}/values.yml
 
-- {{folder_name}}.yml
-
-- values.yml
-
-- {{folder_name}}/values.yml
-
-Examples:
-
-`ktpl`  # will template all resources from `folder-1` and `folder-2`. `folder-2` will be applied twice, the templated resources will be passed to `kubectl apply`
-
-`ktpl folder-1` # will template only resources from `folder-1`, and the templated resources will be passed to `kubectl apply`
-
-`ktpl --template` # will do as example 1, but instead of passing to `kubectl apply` the results will be printed to screen
+### Examples:
+```
+1.) ktpl
+- processes folder-1/template.yml.tpl, and folder-2/template.yml.tpl. processes folder-2/template.yml.tpl twice. once with values from folder-2.yml, and once with values from folder-2-customer-b.yml. 
+2.) ktpl folder-1
+- processes folder-1/template.yml.tpl with values from values.yml, values.yml.secret, and folder-1.yml. variables from folder-1.yml will override defaulty variables set in values.yml
+3.) ktpl --template
+- processes the same as example 1, but prints the template to screen instead of sending to kubectl
+```
 
 
 

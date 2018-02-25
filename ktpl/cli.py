@@ -49,6 +49,8 @@ def main(arguments):
     if arguments['--environment']:
         variables = merge_variables(variables, dict(os.environ.items()))
 
+    # Update variables dictionary. 
+    # if input-file is specified, we don't read in values files.
     if arguments['--input-file']:
         for filename in arguments['--input-file']:
             variables = merge_variables(variables, process_variables(filename))
@@ -61,6 +63,11 @@ def main(arguments):
 
     if arguments['<folder>']:
         folders = arguments['<folder>']
+        for folder in folders:
+            if not os.path.isdir(folder):
+                print('Can not process %s, folder not found' % folder)
+                folders.remove(folder)
+
     elif arguments['--template-file']:
         process_output(variables, arguments['--template-file'], arguments, kube_method)
     else:

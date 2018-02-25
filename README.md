@@ -1,12 +1,11 @@
 # ktpl
 
-Command line utility to template out Kubernetes Resource Definitions from jinja2 templates, and apply or delete them
+Utility to template Kubernetes Resource Definitions using the jinja2 templating engine, then apply or delete the templated resources
 
 ## Getting Started
 `pip install git+https://github.com/whereismyjetpack/ktpl.git@master`
 
 ### Prerequisites
-
 `kubectl`
 
 ### Usage
@@ -42,9 +41,9 @@ Options:
 ```
 
 ### Variable precidence:
-{{folder_name}}.yml
-values.yml
-{{folder_name}}/values.yml
+{{folder_name}}.yml  
+values.yml  
+{{folder_name}}/values.yml  
 
 ### Examples:
 ```

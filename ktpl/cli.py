@@ -23,7 +23,7 @@ from .filters import b64dec, b64enc, slugify_string
 
 
 def main(arguments):
-    
+
     variables = {}
     extensions = ('.yaml', '.yml')
     template_extensions = ('.tpl')
@@ -94,11 +94,18 @@ def main(arguments):
 
 
 def merge_variables(x, y):
+    """
+    Take two dictonaries, and merge them
+    Second argument gets merged into the first.
+    """
     z = x.copy()
     z.update(y)
     return z
 
 def process_output(variables, template_files, arguments, kube_method):
+    """
+    Proccess template files, and either print to screen, or pass to kubectl
+    """
     output = ""
     for file_path in template_files:
         output = output + "\n" + process_template(os.path.basename(os.path.abspath(file_path)), os.path.dirname(os.path.abspath(file_path)), variables)
@@ -109,13 +116,18 @@ def process_output(variables, template_files, arguments, kube_method):
         run_kube_command(output, kube_method)
 
 def find_values_files(folder, extensions, pattern):
+    """
+    Finds variables based off a folder, extension, and pattern match
+    Returns a list of found files.
+    """
     pattern = re.compile(pattern)
     return [ os.path.join(folder, filename) for filename in os.listdir(folder) if filename.endswith(extensions) and pattern.match(filename) ]
 
 
 def process_variables(input_file):
     """
-    Processes variables
+    Takes a variable file as an argument, returns a dictionary
+    of variables for that file
     """
 
     with open(input_file, 'r') as f:
@@ -128,6 +140,10 @@ def process_variables(input_file):
         return {}
 
 def process_template(template_file, searchpath, variables):
+    """
+    Takes a template file, and variables and returns the templated version
+    of that template
+    """
     loader = FileSystemLoader(searchpath=searchpath)
     env = Environment(loader=loader, undefined=StrictUndefined, trim_blocks=False, lstrip_blocks=False)
     env.filters['b64dec'] = b64dec

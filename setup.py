@@ -77,7 +77,7 @@ class PublishCommand(Command):
 # Where the magic happens:
 setup(
     name=NAME,
-    version=versioneer.get_versions(),
+    version=versioneer.get_version(),
     description=DESCRIPTION,
     long_description=long_description,
     author=AUTHOR,

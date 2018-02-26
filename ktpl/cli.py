@@ -17,7 +17,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import yaml
 import re
 import os
-from .__version__ import __version__
+from ktpl import __version__
 from .kube import run_kube_command
 from .filters import b64dec, b64enc, slugify_string
 

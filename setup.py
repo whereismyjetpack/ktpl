@@ -13,8 +13,8 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data.
 NAME = 'ktpl'
-DESCRIPTION = 'Render jinja2 templates from input-files, or from environment variables'
-URL = 'https://github.com/whereismyjetpack/yajinja'
+DESCRIPTION = 'Utility to template Kubernetes Resource Definitions using the jinja2 templating language'
+URL = 'https://github.com/whereismyjetpack/ktpl'
 EMAIL = 'dannbohn@gmail.com'
 AUTHOR = 'Dann Bohn'
 

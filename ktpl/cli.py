@@ -13,7 +13,7 @@ Options:
 """
 from __future__ import absolute_import
 from docopt import docopt
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined
 import yaml
 import re
 import os
@@ -73,7 +73,7 @@ def main(arguments):
     else:
         folders = [f for f in sorted(os.listdir(os.getcwd())) if os.path.isdir(f)]
 
-
+    # TODO if no folders, maybe send a message to the user?
     for folder in folders:
         deployment_vars = find_values_files(folder, extensions, "values")
         for filename in deployment_vars:
@@ -82,6 +82,8 @@ def main(arguments):
         secret_values = find_values_files('.', secret_extension, folder)
         template_files = [ os.path.join(dp, f) for dp, dn, fn in os.walk(os.path.expanduser(folder), followlinks=True) for f in fn if f.endswith(template_extensions) ]
 
+        # TODO if passed a folder, and there are no template files we should display a message
+        # if we are looking in all subdirs, maybe not? maybe part of debug?
         if not template_files:
             continue
 
@@ -151,6 +153,7 @@ def process_template(template_file, searchpath, variables):
     Takes a template file, and variables and returns the templated version
     of that template
     """
+    print("processing %s %s" % (searchpath, template_file))
     loader = FileSystemLoader(searchpath=searchpath)
     env = Environment(loader=loader, undefined=StrictUndefined, trim_blocks=False, lstrip_blocks=False)
     env.filters['b64dec'] = b64dec

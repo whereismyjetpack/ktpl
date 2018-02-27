@@ -73,6 +73,7 @@ class PublishCommand(Command):
 
         sys.exit()
 
+publish_cmdclass = { 'publish': PublishCommand }
 
 # Where the magic happens:
 setup(
@@ -111,8 +112,6 @@ setup(
         # 'Programming Language :: Python :: Implementation :: PyPy'
     ],
     # $ setup.py publish support. 
-    cmdclass={
-        'publish': PublishCommand,
-    },
+    cmdclass=versioneer.get_cmdclass(),
 )
 

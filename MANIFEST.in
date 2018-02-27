@@ -1,0 +1,2 @@
+include versioneer.py
+include ktpl/_version.py

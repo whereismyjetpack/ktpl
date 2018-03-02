@@ -1,8 +1,9 @@
 """
 Usage:
   ktpl [options] [<folder>...]
-  ktpl [options] [--input-file=<file>]...
+  ktpl [options] [--input-file=<file>]... [<folder>...]
   ktpl [options] [--template-file=<file>]...
+  ktpl [options] [--input-file=<file>]... [--template-file=<file>]...
 
 Options:
   --delete -d                      Delete, instead of apply templated manifests

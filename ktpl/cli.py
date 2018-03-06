@@ -100,7 +100,7 @@ def main(arguments):
                 process_output(variables, template_files, arguments, kube_method)
         else:
             process_output(variables, template_files, arguments, kube_method)
-
+    
 
 def merge_variables(x, y):
     """

@@ -1,8 +1,9 @@
 """
 Usage:
   ktpl [options] [<folder>...]
-  ktpl [options] [--input-file=<file>]...
+  ktpl [options] [--input-file=<file>]... [<folder>...]
   ktpl [options] [--template-file=<file>]...
+  ktpl [options] [--input-file=<file>]... [--template-file=<file>]...
 
 Options:
   --delete -d                      Delete, instead of apply templated manifests
@@ -12,11 +13,11 @@ Options:
   --template-file=<file> -t        Path to template file(s) to process instead of the defaults
 """
 from __future__ import absolute_import
-from docopt import docopt
-from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined
-import yaml
 import re
 import os
+import yaml
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from docopt import docopt
 from ktpl import __version__
 from .kube import run_kube_command
 from .filters import b64dec, b64enc, slugify_string
@@ -49,7 +50,7 @@ def main(arguments):
     if arguments['--environment']:
         variables = merge_variables(variables, dict(os.environ.items()))
 
-    # Update variables dictionary. 
+    # Update variables dictionary.
     # if input-file is specified, we don't read in values files.
     if arguments['--input-file']:
         for filename in arguments['--input-file']:
@@ -170,7 +171,7 @@ def process_template(template_file, searchpath, variables):
 
 def cli():
     arguments = docopt(__doc__, version=__version__)
-    main(arguments) 
+    main(arguments)
 
 if __name__ == '__main__':
     cli()

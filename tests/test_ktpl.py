@@ -12,3 +12,14 @@ def test_template():
     foo = ktpl.cli.main(args)
     assert foo is None
 
+def test_b64enc():
+    input = 'foo'
+    r = ktpl.filters.b64enc(input)
+    assert type(r) is str
+    assert r == 'Zm9v'
+
+def test_b64dec():
+    input = 'Zm9v'
+    r = ktpl.filters.b64dec(input)
+    assert type(r) is str
+    assert r == 'foo'

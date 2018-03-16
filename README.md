@@ -2,6 +2,8 @@
 
 Utility to template Kubernetes Resource Definitions using the jinja2 templating engine, then apply or delete the templated resources
 
+[![Build Status](https://travis-ci.org/whereismyjetpack/ktpl.svg?branch=master)](https://travis-ci.org/whereismyjetpack/ktpl)
+
 ## Getting Started
 `pip install git+https://github.com/whereismyjetpack/ktpl.git@master`
 

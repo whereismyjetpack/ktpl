@@ -11,7 +11,7 @@ Options:
   --template -t                    Template manifests, and print to screen
   --environment -e                 Consider environment when processing variables
   --input-file=<file> -i           Path to input file(s) to process instead of the defaults
-  --template-file=<file> -t        Path to template file(s) to process instead of the defaults
+  --template-file=<file>           Path to template file(s) to process instead of the defaults
 """
 from __future__ import absolute_import
 import re

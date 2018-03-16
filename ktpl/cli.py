@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Usage:
-  ktpl [--template-file=<file>...] [--input-file=<file>...] ( [--template] | [--delete] ) [--environment] [<folder>]
+  ktpl [--template-file=<file>...] [--input-file=<file>...] ( [--template] | [--delete] ) [--environment] [<folder>...]
  
 Options:
   --delete -d                      Delete, instead of apply templated manifests

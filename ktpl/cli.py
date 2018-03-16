@@ -2,6 +2,7 @@
 """
 Usage:
   ktpl [options] [<folder>...]
+  ktpl [options] [--template-file=<file>]... [--template]
   ktpl [options] [--input-file=<file>]... [<folder>...]
   ktpl [options] [--template-file=<file>]...
   ktpl [options] [--input-file=<file>]... [--template-file=<file>]...
@@ -160,7 +161,7 @@ def process_template(template_file, searchpath, variables):
     Takes a template file, and variables and returns the templated version
     of that template
     """
-    print("processing %s %s" % (searchpath, template_file))
+    #print("processing %s %s" % (searchpath, template_file))
     loader = FileSystemLoader(searchpath=searchpath)
     env = Environment(loader=loader, undefined=StrictUndefined, trim_blocks=False, lstrip_blocks=False)
     env.filters['b64dec'] = b64dec

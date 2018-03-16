@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
 """
 Usage:
-  ktpl [options] [<folder>...]
-  ktpl [options] [--template-file=<file>]... [--template]
-  ktpl [options] [--input-file=<file>]... [<folder>...]
-  ktpl [options] [--template-file=<file>]...
-  ktpl [options] [--input-file=<file>]... [--template-file=<file>]...
-
+  ktpl [--template-file=<file>...] [--input-file=<file>...] ( [--template] | [--delete] ) [--environment] [<folder>]
+ 
 Options:
   --delete -d                      Delete, instead of apply templated manifests
   --template -t                    Template manifests, and print to screen
   --environment -e                 Consider environment when processing variables
-  --input-file=<file> -i           Path to input file(s) to process instead of the defaults
-  --template-file=<file>           Path to template file(s) to process instead of the defaults
+  --input-file=<file>... -i           Path to input file(s) to process instead of the defaults
+  --template-file=<file>...           Path to template file(s) to process instead of the defaults
 """
 from __future__ import absolute_import
 import re

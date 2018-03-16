@@ -15,11 +15,11 @@ def test_template():
 def test_b64enc():
     input = 'foo'
     r = ktpl.filters.b64enc(input)
-    assert type(r) is str
+    assert type(r) is str or unicode
     assert r == 'Zm9v'
 
 def test_b64dec():
     input = 'Zm9v'
     r = ktpl.filters.b64dec(input)
-    assert type(r) is str
+    assert type(r) is str or unicode
     assert r == 'foo'

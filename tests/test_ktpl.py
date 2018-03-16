@@ -5,15 +5,10 @@ from .context import ktpl
 
 doc = ktpl.cli.__doc__
 
-args = docopt(doc)
-args['--template'] = True
-print(args)
-
-ktpl.cli.main(args)
-
+# args = docopt(doc)
 
 def test_template():
-    args = docopt(doc)
-    args['--template'] = True
-    ktpl.cli.main(args)
+    args = docopt(doc, ['--template', 'tests'])
+    foo = ktpl.cli.main(args)
+    assert foo is None
 

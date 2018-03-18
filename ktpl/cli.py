@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 Usage:
-  ktpl [--template-file=<file>...] [--input-file=<file>...] ( [--template] | [--delete] ) [--environment] [<folder>...]
+  ktpl [--template-file=<file>...] [--input-file=<file>...] ( [--template] | [--delete] ) [--environment] [<folder>...] [-v|-vv|-vvv]
  
 Options:
-  --delete -d                      Delete, instead of apply templated manifests
-  --template -t                    Template manifests, and print to screen
-  --environment -e                 Consider environment when processing variables
+  --delete -d                         Delete, instead of apply templated manifests
+  --template -t                       Template manifests, and print to screen
+  --environment -e                    Consider environment when processing variables
   --input-file=<file>... -i           Path to input file(s) to process instead of the defaults
   --template-file=<file>...           Path to template file(s) to process instead of the defaults
 """
@@ -41,17 +41,25 @@ def main(arguments):
         return False
 
     if arguments['--delete']:
+        if verbosity >=3:
+            print("selecting delete kube method")
         kube_method = 'delete'
     else:
+        if verbosity >=3:
+            print("selecting apply kube method")
         kube_method = 'apply'
 
     if arguments['--environment']:
+        if verbosity >=3:
+            print("merging in environment variables")
         variables = merge_variables(variables, dict(os.environ.items()))
 
     # Update variables dictionary.
     # if input-file is specified, we don't read in values files.
     if arguments['--input-file']:
         for filename in arguments['--input-file']:
+            if verbosity >=3:
+                print("adding variables from %s" % (filename))
             variables = merge_variables(variables, process_variables(filename))
     else:
         values_files = find_values_files('.', extensions, "values")
@@ -157,7 +165,8 @@ def process_template(template_file, searchpath, variables):
     Takes a template file, and variables and returns the templated version
     of that template
     """
-    #print("processing %s %s" % (searchpath, template_file))
+    if verbosity > 0:
+        print("processing %s %s" % (searchpath, template_file))
     loader = FileSystemLoader(searchpath=searchpath)
     env = Environment(loader=loader, undefined=StrictUndefined, trim_blocks=False, lstrip_blocks=False)
     env.filters['b64dec'] = b64dec
@@ -169,6 +178,8 @@ def process_template(template_file, searchpath, variables):
 
 def cli():
     arguments = docopt(__doc__, version=__version__)
+    global verbosity
+    verbosity = arguments['-v']
     main(arguments)
 
 if __name__ == '__main__':

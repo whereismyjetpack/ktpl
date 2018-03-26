@@ -116,13 +116,13 @@ def process_output(variables, template_files, arguments, kube_method):
     """
     output = ""
     for file_path in template_files:
-        output = output + "\n" + process_template(os.path.basename(os.path.abspath(file_path)),
-                                    os.path.dirname(os.path.abspath(file_path)), variables)
-
-    if arguments['--template']:
-        print(output)
-    else:
-        run_kube_command(output, kube_method)
+        output = process_template(os.path.basename(os.path.abspath(file_path)),
+                                  os.path.dirname(os.path.abspath(file_path)), variables)
+                                  
+        if arguments['--template']:
+            print(output)
+        else:
+            run_kube_command(output, kube_method)
 
 def find_values_files(folder, extensions, pattern):
     """

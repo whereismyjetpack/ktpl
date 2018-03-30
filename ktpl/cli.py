@@ -88,15 +88,17 @@ def main(arguments):
 
         if deployment_values:
             for filename in deployment_values:
+                this_vars = {}
                 if has_secret_file(filename):
-                    variables = merge_variables(variables, process_variables(filename + secret_extension))
+                    this_vars = merge_variables(variables, process_variables(filename + secret_extension))
                     secret_values.remove(filename + secret_extension)
-                variables = merge_variables(variables, process_variables(filename))
-                process_output(variables, template_files, arguments, kube_method)
+                this_vars = merge_variables(variables, process_variables(filename))
+                process_output(this_vars, template_files, arguments, kube_method)
         if secret_values:
             for filename in secret_values:
-                variables = merge_variables(variables, process_variables(filename))
-                process_output(variables, template_files, arguments, kube_method)
+                this_vars = {}
+                this_vars = merge_variables(variables, process_variables(filename))
+                process_output(this_vars, template_files, arguments, kube_method)
         else:
             process_output(variables, template_files, arguments, kube_method)
     

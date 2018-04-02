@@ -89,12 +89,14 @@ def main(arguments):
         if deployment_values:
             for filename in deployment_values:
                 this_vars = {}
+                secret_vars = {}
                 if has_secret_file(filename):
-                    this_vars = merge_variables(variables, process_variables(filename + secret_extension))
+                    secret_vars = merge_variables(variables, process_variables(filename + secret_extension))
                     secret_values.remove(filename + secret_extension)
                 this_vars = merge_variables(variables, process_variables(filename))
+                this_vars = merge_variables(this_vars, secret_vars)
                 process_output(this_vars, template_files, arguments, kube_method)
-        if secret_values:
+        elif secret_values:
             for filename in secret_values:
                 this_vars = {}
                 this_vars = merge_variables(variables, process_variables(filename))
@@ -116,14 +118,15 @@ def process_output(variables, template_files, arguments, kube_method):
     """
     Proccess template files, and either print to screen, or pass to kubectl
     """
+    output = ""
     for file_path in template_files:
-        output = process_template(os.path.basename(os.path.abspath(file_path)),
+        output = output + "\n" + process_template(os.path.basename(os.path.abspath(file_path)),
                                   os.path.dirname(os.path.abspath(file_path)), variables)
 
-        if arguments['--template']:
-            print(output)
-        else:
-            run_kube_command(output, kube_method)
+    if arguments['--template']:
+        print(output)
+    else:
+        run_kube_command(output, kube_method)
 
 def find_values_files(folder, extensions, pattern):
     """

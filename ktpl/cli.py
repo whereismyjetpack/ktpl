@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """
 Usage:
-  ktpl [--template-file=<file>...] [--input-file=<file>...] ( [--template] | [--delete] ) [--environment] [<folder>...]
+  ktpl [--template-file=<file>...] [--input-file=<file>...] ( [--std-out] | [--delete] ) [--environment] [<folder>...]
  
 Options:
   --delete -d                         Delete, instead of apply templated manifests
-  --template -t                       Template manifests, and print to screen
+  --std-out -s                       Template manifests, and print to screen
   --environment -e                    Consider environment when processing variables
   --input-file=<file>... -i           Path to input file(s) to process instead of the defaults
-  --template-file=<file>...           Path to template file(s) to process instead of the defaults
+  --template-file=<file>... -t           Path to template file(s) to process instead of the defaults
 """
 from __future__ import absolute_import
 import re
@@ -144,6 +144,7 @@ def find_values_files(folder, extensions, pattern):
             if filename.endswith(extensions)
                 and pattern.match(filename) ]
 
+
 def template_variables(variables):
     """
     allows setting variables from other variables
@@ -155,9 +156,15 @@ def template_variables(variables):
     env.filters['uuid'] = uuid_filter
     env.filters['slugify_string'] = slugify_string
     template = env.from_string(json.dumps(variables))
+    rendered_variables = template.render(variables)
 
-    return json.loads(template.render(variables))
+    # If there are still variables to tempalte, we do that
+    if env.variable_start_string or env.block_start_string in rendered_variables:
+        template = env.from_string(rendered_variables)
+        rendered_variables = template.render(json.loads(rendered_variables))
 
+
+    return json.loads(rendered_variables)
 
 def process_variables(input_file):
     """

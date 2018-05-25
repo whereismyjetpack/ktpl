@@ -13,12 +13,13 @@ Options:
 from __future__ import absolute_import
 import re
 import os
+import json
 import yaml
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from jinja2 import Environment, FileSystemLoader, StrictUndefined, DictLoader
 from docopt import docopt
 from ktpl import __version__
 from .kube import run_kube_command
-from .filters import b64dec, b64enc, slugify_string
+from .filters import b64dec, b64enc, slugify_string, uuid_filter
 
 
 def main(arguments):
@@ -118,6 +119,9 @@ def process_output(variables, template_files, arguments, kube_method):
     """
     Proccess template files, and either print to screen, or pass to kubectl
     """
+
+    # template variables 
+    variables = template_variables(variables)
     output = ""
     for file_path in template_files:
         output = output + "\n" + process_template(os.path.basename(os.path.abspath(file_path)),
@@ -139,6 +143,20 @@ def find_values_files(folder, extensions, pattern):
         for filename in os.listdir(folder)
             if filename.endswith(extensions)
                 and pattern.match(filename) ]
+
+def template_variables(variables):
+    """
+    allows setting variables from other variables
+    """
+    loader = DictLoader(variables)
+    env = Environment(loader=loader, undefined=StrictUndefined, trim_blocks=False, lstrip_blocks=False)
+    env.filters['b64dec'] = b64dec
+    env.filters['b64enc'] = b64enc
+    env.filters['uuid'] = uuid_filter
+    env.filters['slugify_string'] = slugify_string
+    template = env.from_string(json.dumps(variables))
+
+    return json.loads(template.render(variables))
 
 
 def process_variables(input_file):
@@ -165,6 +183,7 @@ def process_template(template_file, searchpath, variables):
     env = Environment(loader=loader, undefined=StrictUndefined, trim_blocks=False, lstrip_blocks=False)
     env.filters['b64dec'] = b64dec
     env.filters['b64enc'] = b64enc
+    env.filters['uuid'] = uuid_filter
     env.filters['slugify_string'] = slugify_string
     template = env.get_template(template_file)
 

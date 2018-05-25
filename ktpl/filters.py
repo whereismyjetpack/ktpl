@@ -1,4 +1,5 @@
 import base64
+import uuid
 from slugify import slugify
 
 def b64enc(input):
@@ -11,3 +12,6 @@ def b64dec(input):
 
 def slugify_string(input):
     return slugify(input)
+
+def uuid_filter(input):
+    return uuid.uuid4()
